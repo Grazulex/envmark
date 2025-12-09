@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0](https://github.com/Grazulex/envmark/releases/tag/v0.2.0) (2025-12-09)
+
+### Features
+
+- **api:** implement complete REST API for EnvMark ([19d675f](https://github.com/Grazulex/envmark/commit/19d675f17f4bf75aae6446b691b181e0150431d9))
 ## [0.1.0](https://github.com/Grazulex/envmark/releases/tag/v0.1.0) (2025-12-09)
 
 ### Features
