@@ -1,9 +1,7 @@
 ---
 id: 16
 title: 'Créer l''endpoint GET /api/projects/{uuid}/diff'
-created_date: '2025-12-09T20:15:16.390Z'
-updated_date: '2025-12-09T20:15:16.390Z'
-status: To Do
+status: Done
 priority: high
 assignees: []
 labels:
@@ -14,11 +12,18 @@ subtasks: []
 dependencies:
   - 9
 blocked_by: []
+created_date: '2025-12-09T20:15:16.390Z'
+updated_date: '2025-12-09T21:19:23.967Z'
+closed_date: '2025-12-09T21:19:23.967Z'
 changelog:
   - timestamp: '2025-12-09T20:15:16.390Z'
     action: created
     details: Task created
     user: system
+  - timestamp: '2025-12-09T21:19:23.967Z'
+    action: updated
+    details: 'status: To Do → Done'
+    user: user
 acceptance_criteria: []
 ---
 Endpoint pour comparer deux environnements. Paramètres: ?from={env1}&to={env2}. Compare les checksums et retourne les métadonnées des deux versions. Le diff réel est fait côté client (zero-knowledge). Retourne: from{}, to{}, same_checksum.

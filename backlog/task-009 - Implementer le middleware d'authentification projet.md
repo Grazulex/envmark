@@ -1,7 +1,7 @@
 ---
 id: 9
 title: Implémenter le middleware d'authentification projet
-status: To Do
+status: Done
 priority: critical
 assignees: []
 labels:
@@ -23,7 +23,8 @@ blocked_by:
   - 18
   - 20
 created_date: '2025-12-09T20:14:35.432Z'
-updated_date: '2025-12-09T20:27:22.297Z'
+updated_date: '2025-12-09T21:15:56.749Z'
+closed_date: '2025-12-09T21:15:56.749Z'
 changelog:
   - timestamp: '2025-12-09T20:14:35.432Z'
     action: created
@@ -49,6 +50,14 @@ changelog:
     action: modified
     details: Task updated
     user: AI
+  - timestamp: '2025-12-09T21:15:16.045Z'
+    action: updated
+    details: 'status: To Do → In Progress'
+    user: user
+  - timestamp: '2025-12-09T21:15:56.749Z'
+    action: updated
+    details: 'status: In Progress → Done'
+    user: user
 acceptance_criteria:
   - text: Middleware vérifie les headers X-Project-UUID et X-Project-Auth
     checked: false

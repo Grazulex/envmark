@@ -1,7 +1,7 @@
 ---
 id: 10
 title: Créer l'endpoint POST /api/projects/register
-status: To Do
+status: Done
 priority: critical
 assignees: []
 labels:
@@ -16,7 +16,8 @@ blocked_by:
   - 37
   - 45
 created_date: '2025-12-09T20:14:39.032Z'
-updated_date: '2025-12-09T20:27:54.540Z'
+updated_date: '2025-12-09T21:19:20.297Z'
+closed_date: '2025-12-09T21:19:20.297Z'
 changelog:
   - timestamp: '2025-12-09T20:14:39.032Z'
     action: created
@@ -42,6 +43,14 @@ changelog:
     action: modified
     details: Task updated
     user: AI
+  - timestamp: '2025-12-09T21:15:57.351Z'
+    action: updated
+    details: 'status: To Do → In Progress'
+    user: user
+  - timestamp: '2025-12-09T21:19:20.297Z'
+    action: updated
+    details: 'status: In Progress → Done'
+    user: user
 acceptance_criteria:
   - text: Endpoint POST /api/projects/register accessible sans auth
     checked: false

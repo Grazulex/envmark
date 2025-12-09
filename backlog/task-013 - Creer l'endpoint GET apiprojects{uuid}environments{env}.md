@@ -1,7 +1,7 @@
 ---
 id: 13
 title: 'Créer l''endpoint GET /api/projects/{uuid}/environments/{env}'
-status: To Do
+status: Done
 priority: critical
 assignees: []
 labels:
@@ -15,7 +15,8 @@ blocked_by:
   - 37
   - 45
 created_date: '2025-12-09T20:15:03.914Z'
-updated_date: '2025-12-09T20:28:35.272Z'
+updated_date: '2025-12-09T21:19:22.100Z'
+closed_date: '2025-12-09T21:19:22.100Z'
 changelog:
   - timestamp: '2025-12-09T20:15:03.914Z'
     action: created
@@ -41,6 +42,10 @@ changelog:
     action: modified
     details: Task updated
     user: AI
+  - timestamp: '2025-12-09T21:19:22.100Z'
+    action: updated
+    details: 'status: To Do → Done'
+    user: user
 acceptance_criteria:
   - text: Retourne la dernière version par défaut
     checked: false
