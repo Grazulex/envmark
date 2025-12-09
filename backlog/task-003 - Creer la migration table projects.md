@@ -1,7 +1,7 @@
 ---
 id: 3
 title: Créer la migration table projects
-status: To Do
+status: Done
 priority: high
 assignees: []
 labels:
@@ -16,7 +16,8 @@ blocked_by:
   - 5
   - 6
 created_date: '2025-12-09T20:13:46.136Z'
-updated_date: '2025-12-09T20:26:51.313Z'
+updated_date: '2025-12-09T21:10:37.253Z'
+closed_date: '2025-12-09T21:10:37.253Z'
 changelog:
   - timestamp: '2025-12-09T20:13:46.136Z'
     action: created
@@ -38,13 +39,37 @@ changelog:
     action: modified
     details: Task updated
     user: AI
+  - timestamp: '2025-12-09T21:08:07.133Z'
+    action: updated
+    details: 'status: To Do → In Progress'
+    user: user
+  - timestamp: '2025-12-09T21:09:33.702Z'
+    action: modified
+    details: Task updated
+    user: AI
+  - timestamp: '2025-12-09T21:10:00.549Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T21:10:01.164Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T21:10:01.785Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T21:10:37.253Z'
+    action: updated
+    details: 'status: In Progress → Done'
+    user: user
 acceptance_criteria:
   - text: 'Migration créée avec les champs: id, uuid, name, password_hash, timestamps'
-    checked: false
+    checked: true
   - text: Index unique sur la colonne uuid
-    checked: false
+    checked: true
   - text: UUID au format VARCHAR(50) pour préfixe proj_
-    checked: false
+    checked: true
 ai_plan: |-
   ## Plan d'implémentation
 
@@ -77,5 +102,11 @@ ai_plan: |-
       $table->index('uuid');
   });
   ```
+ai_notes: |
+  **2025-12-09T21:09:33.701Z** - **22:09** - Migration projects créée avec:
+  - uuid (string 50, unique, indexed)
+  - name (string 255)
+  - password_hash (string 255)
+  - timestamps
 ---
 Migration pour la table projects selon le schéma: id BIGSERIAL, uuid VARCHAR(50) UNIQUE, name VARCHAR(255), password_hash VARCHAR(255), timestamps. Créer les index sur uuid.

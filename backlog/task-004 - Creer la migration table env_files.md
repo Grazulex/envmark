@@ -1,7 +1,7 @@
 ---
 id: 4
 title: Créer la migration table env_files
-status: To Do
+status: Done
 priority: high
 assignees: []
 labels:
@@ -14,7 +14,8 @@ dependencies:
 blocked_by:
   - 7
 created_date: '2025-12-09T20:13:49.592Z'
-updated_date: '2025-12-09T20:27:04.745Z'
+updated_date: '2025-12-09T21:10:37.898Z'
+closed_date: '2025-12-09T21:10:37.898Z'
 changelog:
   - timestamp: '2025-12-09T20:13:49.592Z'
     action: created
@@ -40,15 +41,39 @@ changelog:
     action: modified
     details: Task updated
     user: AI
+  - timestamp: '2025-12-09T21:09:38.814Z'
+    action: modified
+    details: Task updated
+    user: AI
+  - timestamp: '2025-12-09T21:10:09.238Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T21:10:09.875Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T21:10:10.543Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T21:10:11.197Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T21:10:37.898Z'
+    action: updated
+    details: 'status: To Do → Done'
+    user: user
 acceptance_criteria:
   - text: Table env_files avec FK vers projects
-    checked: false
+    checked: true
   - text: 'Contrainte UNIQUE sur (project_id, environment, version)'
-    checked: false
+    checked: true
   - text: Index composite pour requêtes fréquentes
-    checked: false
+    checked: true
   - text: CASCADE sur suppression du projet
-    checked: false
+    checked: true
 ai_plan: >-
   ## Plan d'implémentation
 
@@ -95,5 +120,13 @@ ai_plan: >-
   });
 
   ```
+ai_notes: |
+  **2025-12-09T21:09:38.814Z** - **22:09** - Migration env_files créée avec:
+  - project_id (FK cascade)
+  - environment (string 50)
+  - version (unsigned int)
+  - encrypted_content (text)
+  - checksum (string 64)
+  - unique constraint sur [project_id, environment, version]
 ---
 Migration pour la table env_files: id BIGSERIAL, project_id FK, environment VARCHAR(100), version INT, encrypted_content TEXT, checksum VARCHAR(64), comment VARCHAR(500), timestamps. Index composites sur (project_id, environment) et (project_id, environment, version DESC).
