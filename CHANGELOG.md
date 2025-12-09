@@ -1,0 +1,9 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [0.1.0](https://github.com/Grazulex/envmark/releases/tag/v0.1.0) (2025-12-09)
+
+### Features
+
+- **api:** add database migrations for projects, env_files, and audit_logs ([cd11e07](https://github.com/Grazulex/envmark/commit/cd11e0770e10eca41d2e736a712e63024c245721))
