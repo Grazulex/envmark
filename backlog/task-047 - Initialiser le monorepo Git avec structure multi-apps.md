@@ -1,7 +1,7 @@
 ---
 id: 47
 title: Initialiser le monorepo Git avec structure multi-apps
-status: In Progress
+status: Done
 priority: critical
 assignees: []
 labels:
@@ -12,7 +12,8 @@ subtasks: []
 dependencies: []
 blocked_by: []
 created_date: '2025-12-09T20:38:41.300Z'
-updated_date: '2025-12-09T20:44:17.238Z'
+updated_date: '2025-12-09T20:45:04.560Z'
+closed_date: '2025-12-09T20:45:04.560Z'
 changelog:
   - timestamp: '2025-12-09T20:38:41.300Z'
     action: created
@@ -50,15 +51,39 @@ changelog:
     action: modified
     details: Task updated
     user: AI
+  - timestamp: '2025-12-09T20:44:56.942Z'
+    action: modified
+    details: Task updated
+    user: AI
+  - timestamp: '2025-12-09T20:44:57.715Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T20:44:58.359Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T20:44:59.003Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T20:44:59.705Z'
+    action: modified
+    details: Task updated
+    user: user
+  - timestamp: '2025-12-09T20:45:04.560Z'
+    action: updated
+    details: 'status: In Progress → Done'
+    user: user
 acceptance_criteria:
   - text: Repository Git initialisé
-    checked: false
+    checked: true
   - text: 'Structure api/, cli/, web/ créée'
-    checked: false
+    checked: true
   - text: .gitignore configuré pour les 3 stacks
-    checked: false
+    checked: true
   - text: README.md principal avec vue d'ensemble
-    checked: false
+    checked: true
 ai_plan: |-
   ## Plan d'implémentation
 
@@ -156,5 +181,8 @@ ai_notes: >
 
   **2025-12-09T20:44:17.238Z** - **21:45** - Structure créée: api/, cli/, web/,
   docs/, .github/workflows/
+
+  **2025-12-09T20:44:56.942Z** - **21:46** - Repository poussé sur GitHub:
+  git@github.com:Grazulex/envmark.git
 ---
 Créer la structure monorepo pour les 3 applications: api/ (Laravel), cli/ (TypeScript), web/ (Landing page). Configurer Git, .gitignore global, et README principal. Cette tâche doit être faite AVANT toutes les autres.
