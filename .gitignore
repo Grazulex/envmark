@@ -1,75 +1,34 @@
-# ===================
 # Dependencies
-# ===================
 node_modules/
-vendor/
 
-# ===================
-# Environment & Secrets
-# ===================
+# Build output
+dist/
+
+# Environment files
 .env
 .env.local
 .env.*.local
+
+# EnvMark sensitive files
 .envmark.key
 
-# ===================
-# Build outputs
-# ===================
-dist/
-build/
-*.phar
-
-# ===================
-# IDE & Editors
-# ===================
+# IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-*~
 
-# ===================
-# OS files
-# ===================
+# OS
 .DS_Store
 Thumbs.db
 
-# ===================
 # Logs
-# ===================
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
-# ===================
-# Laravel specific
-# ===================
-api/storage/logs/*
-api/storage/framework/cache/*
-api/storage/framework/sessions/*
-api/storage/framework/views/*
-api/bootstrap/cache/*
-!api/storage/logs/.gitkeep
-!api/storage/framework/cache/.gitkeep
-!api/storage/framework/sessions/.gitkeep
-!api/storage/framework/views/.gitkeep
-!api/bootstrap/cache/.gitkeep
-
-# ===================
-# Docker
-# ===================
-.docker/data/
-
-# ===================
-# Testing
-# ===================
+# Test coverage
 coverage/
-.nyc_output/
-.phpunit.result.cache
 
-# ===================
-# Misc
-# ===================
+# Cache
 .cache/
-*.bak
+*.tsbuildinfo

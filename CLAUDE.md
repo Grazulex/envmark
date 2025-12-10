@@ -2,261 +2,250 @@
 
 ## Apercu du projet
 
-EnvMark est un outil de gestion centralisee et securisee des fichiers `.env` pour equipes de developpement. Il utilise une architecture SaaS avec chiffrement cote client (zero-knowledge).
+EnvMark est un CLI de gestion des fichiers `.env` utilisant Git comme backend de stockage. Un seul repo pour tous les projets, une branche par environnement. Zero serveur, zero API, 100% local.
 
 ## Architecture
 
-- **Backend** : Laravel 11+ avec PostgreSQL
-- **CLI** : Go ou PHP (Phar) - binaire multi-plateforme
-- **Frontend** : Livewire ou Inertia.js + Tailwind CSS
-- **Chiffrement** : AES-256-GCM cote client
+- **CLI** : TypeScript/Node.js
+- **Backend** : Git (1 repo unique pour tous les projets)
+- **Stockage** : 1 branche = 1 environnement, 1 dossier = 1 projet
+- **Chiffrement** : AES-256-GCM optionnel cote client
 
-### Principe zero-knowledge
+### Principe de fonctionnement
 
-Le serveur ne voit jamais les secrets en clair. Le chiffrement/dechiffrement se fait exclusivement cote client avec la cle projet.
+```
+envmark-secrets (repo Git unique)
+├── branch: development
+│   ├── project-alpha/.env
+│   ├── project-beta/.env
+│   └── api-gateway/.env
+├── branch: staging
+│   ├── project-alpha/.env
+│   └── ...
+├── branch: qa
+│   └── ...
+└── branch: main (production)
+    ├── project-alpha/.env
+    └── ...
+```
 
-### Authentification sans compte
+- `envmark push dev` → checkout branche `development`, commit dans dossier projet, push
+- `envmark pull prod` → checkout branche `main`, copie `.env` du dossier projet vers local
+- Tous les projets dans un seul repo
+- Toutes les branches (envs) partagees entre projets
 
-Pas d'OAuth, pas d'email, pas de gestion d'utilisateurs. Un projet = un UUID + un mot de passe partage en equipe.
+### Avantages
 
-## Structure des fichiers cles
+- 1 seul repo pour toute l'equipe/entreprise
+- Zero serveur a maintenir
+- Zero cout d'hebergement
+- Git donne tout gratuitement : versioning, diff, branches, PR, protections
+- Branch protection sur main = securiser la prod
+- Coherent avec la philosophie des autres outils (Stackmark, Shipmark, Backmark)
 
-- `.envmark.json` : Configuration projet (versionne dans Git)
-- `.envmark.key` : Cle AES-256 (dans .gitignore, CONFIDENTIEL)
+## Structure des fichiers
 
-## Commandes CLI principales
+### Cote projet utilisateur
+```
+mon-projet/
+├── .env              # Fichier environnement actif (gitignore)
+├── .envmark.json     # Configuration (versionne)
+└── .envmark.key      # Cle AES-256 optionnelle (gitignore)
+```
+
+### .envmark.json
+```json
+{
+  "remote": "git@github.com:team/envmark-secrets.git",
+  "project": "my-project-name",
+  "defaultEnv": "development",
+  "encrypt": false
+}
+```
+
+### .envmark.key (optionnel, si encrypt: true)
+```
+ek_base64encodedAES256key...
+```
+
+## Commandes CLI
 
 ```bash
-envmark init                    # Initialiser un nouveau projet
-envmark push [env]              # Upload .env chiffre
-envmark pull [env]              # Download .env
-envmark list                    # Lister les environnements
-envmark diff env1 env2          # Comparer deux environnements
-envmark history [env]           # Historique des versions
-envmark rollback [env] --version N
-envmark passwd                  # Changer le mot de passe
-envmark logout                  # Effacer le cache de session
-envmark status                  # Afficher la configuration
+envmark init                     # Initialiser config locale (demande nom projet + remote)
+envmark remote <git-url>         # Configurer/changer le repo de stockage
+envmark push [env]               # Push .env vers branche env / dossier projet
+envmark pull [env]               # Pull .env depuis branche env / dossier projet
+envmark list                     # Lister les environnements (branches du repo)
+envmark create <env>             # Creer un nouvel environnement (branche)
+envmark delete <env>             # Supprimer un environnement (branche)
+envmark diff <env1> <env2>       # Comparer .env du projet entre deux envs
+envmark history [env]            # Historique des versions (git log sur le fichier)
+envmark rollback [env] <commit>  # Restaurer une version anterieure
+envmark status                   # Afficher la config et l'etat
+envmark keygen                   # Generer une nouvelle cle de chiffrement
 ```
 
-## API REST - Endpoints principaux
+## Workflow utilisateur
 
+```bash
+# 1. Initialisation (une seule fois par projet)
+cd mon-projet
+envmark init
+# → Demande: nom du projet? remote git?
+# → Cree .envmark.json
+
+# 2. Usage quotidien
+envmark pull dev           # Recuperer le .env de dev
+# ... travailler ...
+envmark push dev           # Sauvegarder les changements
+
+# 3. Deploiement / comparaison
+envmark pull prod          # Recuperer la config prod
+envmark diff dev prod      # Verifier les differences
 ```
-POST   /api/projects/register                    # Nouveau projet
-GET    /api/projects/{uuid}/environments         # Liste environnements
-POST   /api/projects/{uuid}/environments/{env}   # Push
-GET    /api/projects/{uuid}/environments/{env}   # Pull
-GET    /api/projects/{uuid}/environments/{env}/history
-GET    /api/projects/{uuid}/diff?from={env1}&to={env2}
-PUT    /api/projects/{uuid}/password
-DELETE /api/projects/{uuid}
+
+## Mapping branches / environnements
+
+| Alias         | Branche Git      |
+|---------------|------------------|
+| dev           | development      |
+| development   | development      |
+| staging       | staging          |
+| qa            | qa               |
+| prod          | main             |
+| production    | main             |
+
+## Fonctionnement interne
+
+### Push
+```bash
+envmark push dev
+# 1. Clone/fetch le repo envmark-secrets (en cache local ~/.envmark/repo)
+# 2. git checkout development
+# 3. mkdir -p <project-name>
+# 4. cp .env → <project-name>/.env (ou .env.enc si chiffre)
+# 5. git add + commit + push
 ```
 
-### Headers d'authentification
-
+### Pull
+```bash
+envmark pull prod
+# 1. Clone/fetch le repo envmark-secrets
+# 2. git checkout main
+# 3. cp <project-name>/.env → .env local (dechiffre si necessaire)
 ```
-X-Project-UUID: proj_a1b2c3d4-e5f6-7890-abcd-ef1234567890
-X-Project-Auth: encrypted_password_base64...
-```
-
-## Schema de base de donnees
-
-Tables principales :
-- `projects` : UUID, name, password_hash
-- `env_files` : project_id, environment, version, encrypted_content, checksum
-- `audit_logs` : project_id, action, environment, ip_address
 
 ## Securite
 
-- Chiffrement AES-256-GCM avec IV unique par push
-- Tag d'authentification pour detection d'alteration
-- Cache de session : 30 minutes, fichier `~/.envmark/session`
-- Ne jamais versionner `.envmark.key` ni le mot de passe
+- **Chiffrement optionnel** : AES-256-GCM cote client
+- **Cle locale** : `.envmark.key` jamais versionne
+- **Repo prive** : L'utilisateur gere la securite de son repo
+- **Branch protection** : Proteger main sur GitHub/GitLab = proteger prod
 
-## Conventions de developpement
+## Stack technique
 
-- Le serveur stocke uniquement des blobs chiffres
-- Le mot de passe est hashe avec bcrypt cote serveur
-- UUID format : `proj_` suivi d'un UUID v4
-- Cle format : `ek_` suivi de la cle AES-256 en base64
+- TypeScript + Node.js
+- Commander.js pour le parsing CLI
+- simple-git pour les operations Git
+- crypto (Node.js natif) pour AES-256-GCM
 
 ---
 
 ## INSTRUCTIONS OBLIGATOIRES POUR L'IA (Claude Code)
 
-> **IMPORTANT**: Cette section définit le comportement OBLIGATOIRE de l'IA lors du travail sur ce projet. Ces règles sont NON NÉGOCIABLES.
+> **IMPORTANT**: Cette section definit le comportement OBLIGATOIRE de l'IA lors du travail sur ce projet. Ces regles sont NON NEGOCIABLES.
 
-### Règle #1: TOUJOURS utiliser Backmark pour tracker le travail
+### Regle #1: TOUJOURS utiliser Backmark pour tracker le travail
 
-Quand l'utilisateur te demande de faire une tâche de développement:
+Quand l'utilisateur te demande de faire une tache de developpement:
 
 ```bash
-# 1. CRÉER LA TÂCHE IMMÉDIATEMENT
-backmark task create "<titre descriptif>" -a "@claude" -p <priorité> -l "<labels>"
+# 1. CREER LA TACHE IMMEDIATEMENT
+backmark task create "<titre descriptif>" -a "@claude" -p <priorite> -l "<labels>"
 
 # 2. DOCUMENTER TON PLAN AVANT DE CODER
-backmark task ai-plan <id> "## Plan d'implémentation
+backmark task ai-plan <id> "## Plan d'implementation
 ### Objectif
 <ce que tu vas accomplir>
 
-### Étapes
-1. <étape 1>
-2. <étape 2>
+### Etapes
+1. <etape 1>
+2. <etape 2>
 
-### Fichiers concernés
+### Fichiers concernes
 - <fichier 1>
 - <fichier 2>
 
 ### Approche technique
-<ta stratégie>"
+<ta strategie>"
 
-# 3. DÉMARRER LE TRAVAIL
+# 3. DEMARRER LE TRAVAIL
 backmark task edit <id> --status "In Progress"
 ```
 
-### Règle #2: DOCUMENTER pendant l'implémentation
+### Regle #2: DOCUMENTER pendant l'implementation
 
 ```bash
-# Prendre des notes horodatées PENDANT que tu travailles
-backmark task ai-note <id> "**HH:MM** - <ce que tu fais/décides/rencontres>"
+# Prendre des notes horodatees PENDANT que tu travailles
+backmark task ai-note <id> "**HH:MM** - <ce que tu fais/decides/rencontres>"
 
 # Exemples de notes:
-backmark task ai-note <id> "**14:30** - Créé le service auth.ts avec JWT"
-backmark task ai-note <id> "**14:45** - ISSUE: conflit de types, résolu avec generic"
-backmark task ai-note <id> "**15:00** - DECISION: utiliser bcryptjs au lieu de bcrypt"
+backmark task ai-note <id> "**14:30** - Cree le service git.ts"
+backmark task ai-note <id> "**14:45** - ISSUE: probleme avec simple-git, resolu"
+backmark task ai-note <id> "**15:00** - DECISION: utiliser crypto natif Node.js"
 ```
 
-### Règle #3: GÉNÉRER la documentation
+### Regle #3: GENERER la documentation
 
 ```bash
-# Documenter ce que tu as créé
+# Documenter ce que tu as cree
 backmark task ai-doc <id> "## Documentation
 
 ### Utilisation
-<comment utiliser la fonctionnalité>
+<comment utiliser la fonctionnalite>
 
 ### API/Interface
-<endpoints, fonctions, etc.>
+<fonctions, commandes, etc.>
 
 ### Configuration
 <options de config si applicable>"
 ```
 
-### Règle #4: AUTO-REVIEW avant de terminer
+### Regle #4: AUTO-REVIEW avant de terminer
 
 ```bash
-# Faire ton auto-évaluation HONNÊTE
+# Faire ton auto-evaluation HONNETE
 backmark task ai-review <id> "## Auto-Review
 
-### Complété
+### Complete
 - [x] <ce qui est fait>
 - [ ] <ce qui n'est pas fait si applicable>
 
-### Tests effectués
+### Tests effectues
 - <test 1>: OK/NOK
 
 ### Limitations connues
 - <limitation 1>
 
-### Questions pour le développeur
+### Questions pour le developpeur
 - <question si tu as des doutes>"
 ```
 
-### Règle #5: FERMER proprement la tâche
+### Regle #5: FERMER proprement la tache
 
 ```bash
-# Vérifier et cocher les critères d'acceptation
+# Verifier et cocher les criteres d'acceptation
 backmark task check <id> 0
 backmark task check <id> 1
 
-# Fermer la tâche
+# Fermer la tache
 backmark task close <id>
-```
-
-### Commandes slash disponibles
-
-Tu as accès aux commandes slash suivantes pour t'aider:
-
-- `/backmark-guide` - Guide complet de toutes les commandes et du workflow
-- `/start-task` - Workflow pour démarrer une nouvelle tâche
-- `/complete-task` - Workflow pour terminer une tâche proprement
-- `/note` - Comment prendre des notes pendant le développement
-- `/backmark-status` - Vérifier l'état du backlog
-
-### Exemple de session complète
-
-```bash
-# L'utilisateur demande: "Ajoute une fonction de recherche"
-
-# 1. Créer la tâche
-backmark task create "Implémenter la recherche fuzzy" -a "@claude" -p high -l "feature,search"
-# Output: Task #42 created
-
-# 2. Planifier
-backmark task ai-plan 42 "## Plan
-### Objectif
-Ajouter une recherche fuzzy avec Fuse.js
-
-### Étapes
-1. Installer fuse.js
-2. Créer src/utils/search.ts
-3. Ajouter endpoint GET /api/search
-4. Indexer les données existantes
-
-### Fichiers
-- src/utils/search.ts (nouveau)
-- src/routes/api.ts (modifier)"
-
-# 3. Critères d'acceptation
-backmark task add-criterion 42 "Recherche retourne résultats en <100ms"
-backmark task add-criterion 42 "Supporte les filtres par type"
-
-# 4. Démarrer
-backmark task edit 42 --status "In Progress"
-
-# 5. Implémenter avec notes
-backmark task ai-note 42 "**10:00** - npm install fuse.js"
-# ... coder ...
-backmark task ai-note 42 "**10:30** - search.ts créé, threshold=0.3"
-# ... coder ...
-backmark task ai-note 42 "**11:00** - Endpoint fonctionnel, ~45ms"
-
-# 6. Documenter
-backmark task ai-doc 42 "## Search API
-GET /api/search?q=<query>&limit=10
-
-Response: { results: [], total: number }"
-
-# 7. Review
-backmark task ai-review 42 "## Review
-### Complété
-- [x] Fuse.js intégré
-- [x] Endpoint créé
-- [x] Performance OK (45ms)
-
-### Tests
-- 1000 items: 45ms ✓
-- Filtres: OK ✓
-
-### Limitations
-- Pas de support multi-langue"
-
-# 8. Fermer
-backmark task check 42 0
-backmark task check 42 1
-backmark task close 42
 ```
 
 ### Ce qui est INTERDIT
 
-- Coder SANS créer de tâche Backmark
+- Coder SANS creer de tache Backmark
 - Coder SANS documenter un plan d'abord
 - Terminer SANS faire d'auto-review
 - Ignorer les commandes ai-plan, ai-note, ai-doc, ai-review
-- Oublier de mettre à jour le statut de la tâche
-
-### Ressources
-
-- Documentation complète: https://www.backmark.tech/commands
-- AI Workflow: https://www.backmark.tech/ai-workflow
-- Commande slash `/backmark-guide` pour référence rapide
+- Oublier de mettre a jour le statut de la tache
