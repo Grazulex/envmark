@@ -14,6 +14,7 @@ import { diffCommand } from './commands/diff.js';
 import { historyCommand } from './commands/history.js';
 import { deleteCommand } from './commands/delete.js';
 import { rollbackCommand } from './commands/rollback.js';
+import { keygenCommand } from './commands/keygen.js';
 
 const program = new Command();
 
@@ -52,5 +53,6 @@ program.addCommand(diffCommand);
 program.addCommand(historyCommand);
 program.addCommand(deleteCommand);
 program.addCommand(rollbackCommand);
+program.addCommand(keygenCommand);
 
 program.parse();

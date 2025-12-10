@@ -4,7 +4,8 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { loadConfig, getEnvFilePath } from '../lib/config.js';
 import { GitManager, resolveEnvAlias } from '../lib/git.js';
-import { colors, icons, header, success, error, info, keyValue, divider, blank, envBadge } from '../lib/ui.js';
+import { encryptToString, loadKey, keyExists } from '../lib/crypto.js';
+import { colors, icons, header, success, error, info, warning, keyValue, divider, blank, envBadge } from '../lib/ui.js';
 
 export const pushCommand = new Command('push')
   .description('Push local .env file to the repository')
@@ -41,13 +42,31 @@ async function runPush(envArg: string | undefined, options: PushOptions): Promis
   }
 
   // Read .env content
-  const envContent = readFileSync(envPath, 'utf-8');
+  let envContent = readFileSync(envPath, 'utf-8');
+
+  // Check if encryption is enabled
+  let isEncrypted = false;
+  if (config.encrypt) {
+    if (!keyExists(config.project)) {
+      warning('Encryption is enabled but no key found');
+      console.log(colors.muted(`Generate one with: ${colors.primary('envmark keygen')}`));
+      blank();
+      throw new Error('Encryption key required. Run "envmark keygen" first.');
+    }
+
+    const key = loadKey(config.project);
+    if (key) {
+      envContent = encryptToString(envContent, key);
+      isEncrypted = true;
+    }
+  }
 
   // Show what we're doing
   info('Configuration:');
   keyValue('Project', config.project);
   keyValue('Environment', `${env} ${colors.muted(`(branch: ${branch})`)}`);
   keyValue('Remote', config.remote);
+  keyValue('Encryption', isEncrypted ? colors.success('enabled') : colors.muted('disabled'));
   blank();
 
   // Initialize Git manager

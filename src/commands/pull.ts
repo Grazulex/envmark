@@ -4,6 +4,7 @@ import { existsSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { loadConfig, getEnvFilePath } from '../lib/config.js';
 import { GitManager, resolveEnvAlias } from '../lib/git.js';
+import { decryptFromString, isEncrypted, loadKey, keyExists } from '../lib/crypto.js';
 import { colors, icons, header, success, error, info, warning, keyValue, divider, blank, envBadge } from '../lib/ui.js';
 import inquirer from 'inquirer';
 
@@ -128,14 +129,44 @@ async function runPull(envArg: string | undefined, options: PullOptions): Promis
       return;
     }
 
-    spinner.succeed('Fetched .env file');
+    // Check if content is encrypted and decrypt if needed
+    let finalContent = remoteContent;
+    let wasEncrypted = false;
+
+    if (isEncrypted(remoteContent)) {
+      if (!keyExists(config.project)) {
+        spinner.fail('File is encrypted but no key found');
+        blank();
+        warning('The .env file is encrypted but you don\'t have the decryption key');
+        console.log(colors.muted(`Get the key from your team and save it with:`));
+        console.log(colors.muted(`  ${icons.arrow} ${colors.primary('envmark keygen')}`));
+        blank();
+        return;
+      }
+
+      const key = loadKey(config.project);
+      if (key) {
+        try {
+          finalContent = decryptFromString(remoteContent, key);
+          wasEncrypted = true;
+        } catch (err) {
+          spinner.fail('Decryption failed');
+          blank();
+          error('Could not decrypt the .env file. The key may be incorrect.');
+          blank();
+          return;
+        }
+      }
+    }
+
+    spinner.succeed(`Fetched .env file${wasEncrypted ? ' (decrypted)' : ''}`);
     blank();
 
     // Show diff if local file exists and user asked for it
     if (existsSync(outputPath)) {
       const localContent = readFileSync(outputPath, 'utf-8');
 
-      if (localContent === remoteContent) {
+      if (localContent === finalContent) {
         info('Local file is already up to date');
         blank();
         return;
@@ -144,7 +175,7 @@ async function runPull(envArg: string | undefined, options: PullOptions): Promis
       // Simple diff display (just show it's different)
       console.log(colors.muted('Changes will be applied:'));
       const localLines = localContent.split('\n').length;
-      const remoteLines = remoteContent.split('\n').length;
+      const remoteLines = finalContent.split('\n').length;
       console.log(colors.muted(`  Local:  ${localLines} lines`));
       console.log(colors.muted(`  Remote: ${remoteLines} lines`));
       blank();
@@ -167,14 +198,17 @@ async function runPull(envArg: string | undefined, options: PullOptions): Promis
     }
 
     // Write to local file
-    writeFileSync(outputPath, remoteContent, 'utf-8');
+    writeFileSync(outputPath, finalContent, 'utf-8');
 
     // Summary
     divider();
-    success(`${icons.env} .env pulled from ${envBadge(env)}`);
+    success(`${icons.env} .env pulled from ${envBadge(env)}${wasEncrypted ? ' (decrypted)' : ''}`);
     blank();
     keyValue('Saved to', outputPath);
-    keyValue('Lines', remoteContent.split('\n').length.toString());
+    keyValue('Lines', finalContent.split('\n').length.toString());
+    if (wasEncrypted) {
+      keyValue('Encryption', colors.success('decrypted'));
+    }
     blank();
 
   } catch (err) {
