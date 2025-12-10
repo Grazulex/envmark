@@ -7,6 +7,7 @@ import { colors } from './lib/ui.js';
 import { initCommand } from './commands/init.js';
 import { pushCommand } from './commands/push.js';
 import { pullCommand } from './commands/pull.js';
+import { createCommand } from './commands/create.js';
 
 const program = new Command();
 
@@ -38,11 +39,10 @@ program
 program.addCommand(initCommand);
 program.addCommand(pushCommand);
 program.addCommand(pullCommand);
+program.addCommand(createCommand);
 
 // TODO: Add remaining commands
-// - remote
 // - list
-// - create
 // - delete
 // - diff
 // - history

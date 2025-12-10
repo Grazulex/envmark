@@ -163,24 +163,67 @@ async function initGlobalConfig(remoteArg?: string, exists?: boolean): Promise<v
 
   // Test connection to repo
   const spinner = ora('Testing connection to repository...').start();
+  let gitManager: GitManager;
+  let existingBranches: string[] = [];
 
   try {
-    const gitManager = new GitManager({ remote: remote!, verbose: false });
+    gitManager = new GitManager({ remote: remote!, verbose: false });
     await gitManager.ensureRepo();
-    spinner.succeed('Repository accessible');
+    spinner.text = 'Checking existing environments...';
+    existingBranches = await gitManager.listBranches();
+    spinner.succeed(`Repository accessible (${existingBranches.length} environment(s) found)`);
   } catch (err) {
     spinner.fail('Failed to access repository');
     throw new Error(`Cannot access repository: ${(err as Error).message}`);
   }
 
+  // If repo is empty or has only main, offer to create base branches
+  if (existingBranches.length <= 1) {
+    blank();
+    info('This repository needs environment branches.');
+
+    const { createBranches } = await inquirer.prompt([
+      {
+        type: 'checkbox',
+        name: 'createBranches',
+        message: 'Select environments to create:',
+        choices: [
+          { name: 'development', checked: true },
+          { name: 'staging', checked: true },
+          { name: 'qa', checked: false },
+        ].filter(choice => !existingBranches.includes(choice.name)),
+      },
+    ]);
+
+    if (createBranches.length > 0) {
+      const branchSpinner = ora('Creating environment branches...').start();
+      try {
+        for (const branch of createBranches) {
+          branchSpinner.text = `Creating ${branch}...`;
+          await gitManager.createBranch(branch, 'main');
+        }
+        branchSpinner.succeed(`Created ${createBranches.length} environment(s): ${createBranches.join(', ')}`);
+        existingBranches = await gitManager.listBranches();
+      } catch (err) {
+        branchSpinner.fail('Failed to create branches');
+        throw err;
+      }
+    }
+    blank();
+  }
+
   // Ask for additional options
+  const envChoices = existingBranches.length > 0
+    ? existingBranches.map(b => b === 'main' ? 'production' : b)
+    : ['development', 'staging', 'production'];
+
   const { defaultEnv, encrypt } = await inquirer.prompt([
     {
       type: 'list',
       name: 'defaultEnv',
       message: 'Default environment:',
-      choices: ['development', 'staging', 'production'],
-      default: 'development',
+      choices: envChoices,
+      default: envChoices.includes('development') ? 'development' : envChoices[0],
     },
     {
       type: 'confirm',
