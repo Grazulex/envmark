@@ -8,6 +8,12 @@ import { initCommand } from './commands/init.js';
 import { pushCommand } from './commands/push.js';
 import { pullCommand } from './commands/pull.js';
 import { createCommand } from './commands/create.js';
+import { listCommand } from './commands/list.js';
+import { statusCommand } from './commands/status.js';
+import { diffCommand } from './commands/diff.js';
+import { historyCommand } from './commands/history.js';
+import { deleteCommand } from './commands/delete.js';
+import { rollbackCommand } from './commands/rollback.js';
 
 const program = new Command();
 
@@ -40,14 +46,11 @@ program.addCommand(initCommand);
 program.addCommand(pushCommand);
 program.addCommand(pullCommand);
 program.addCommand(createCommand);
-
-// TODO: Add remaining commands
-// - list
-// - delete
-// - diff
-// - history
-// - rollback
-// - status
-// - keygen
+program.addCommand(listCommand);
+program.addCommand(statusCommand);
+program.addCommand(diffCommand);
+program.addCommand(historyCommand);
+program.addCommand(deleteCommand);
+program.addCommand(rollbackCommand);
 
 program.parse();

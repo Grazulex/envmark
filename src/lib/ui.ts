@@ -30,6 +30,9 @@ export const icons = {
   sync: '🔄',
   check: '✓',
   cross: '✗',
+  added: colors.success('+'),
+  removed: colors.error('-'),
+  modified: colors.warning('~'),
 };
 
 // Box drawing

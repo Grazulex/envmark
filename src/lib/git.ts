@@ -258,11 +258,41 @@ export class GitManager {
   }
 
   /**
+   * Initialize an empty repository with a main branch
+   */
+  async initializeEmptyRepo(): Promise<void> {
+    const git = await this.getGit();
+
+    // Check if there are any commits
+    try {
+      await git.log();
+      // If we get here, repo has commits
+      return;
+    } catch {
+      // Repo is empty, create initial commit
+    }
+
+    // Create a README to have an initial commit
+    const readmePath = join(this.repoPath, 'README.md');
+    writeFileSync(readmePath, '# Environment Secrets\n\nThis repository stores encrypted .env files for all projects.\n', 'utf-8');
+
+    await git.add('README.md');
+    await git.commit('Initial commit');
+    await git.push('origin', 'main', ['--set-upstream']);
+  }
+
+  /**
    * Create a new branch (environment)
    */
   async createBranch(branchName: string, baseBranch = 'main'): Promise<void> {
     const git = await this.getGit();
     const resolvedBase = resolveEnvAlias(baseBranch);
+
+    // Check if base branch exists, if not initialize the repo
+    const branches = await this.listBranches();
+    if (branches.length === 0) {
+      await this.initializeEmptyRepo();
+    }
 
     // Checkout base branch first
     await this.checkout(resolvedBase);

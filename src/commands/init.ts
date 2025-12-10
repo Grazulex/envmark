@@ -20,6 +20,8 @@ export const initCommand = new Command('init')
   .option('-l, --local', 'Initialize local project configuration only')
   .option('-r, --remote <url>', 'Git remote URL for secrets repository')
   .option('-p, --project <name>', 'Project name')
+  .option('-e, --env <env>', 'Default environment', 'development')
+  .option('-y, --yes', 'Accept defaults without prompts')
   .action(async (options) => {
     try {
       await runInit(options);
@@ -34,6 +36,8 @@ interface InitOptions {
   local?: boolean;
   remote?: string;
   project?: string;
+  env?: string;
+  yes?: boolean;
 }
 
 async function runInit(options: InitOptions): Promise<void> {
@@ -82,12 +86,12 @@ async function runInit(options: InitOptions): Promise<void> {
 
   // Initialize global config
   if (initGlobal) {
-    await initGlobalConfig(options.remote, hasGlobalConfig);
+    await initGlobalConfig(options.remote, hasGlobalConfig, options.env, options.yes);
   }
 
   // Initialize local config
   if (initLocal) {
-    await initLocalConfig(options.project, hasLocalConfig);
+    await initLocalConfig(options.project, hasLocalConfig, options.yes);
   }
 
   // Show summary
@@ -127,7 +131,7 @@ async function runInit(options: InitOptions): Promise<void> {
   blank();
 }
 
-async function initGlobalConfig(remoteArg?: string, exists?: boolean): Promise<void> {
+async function initGlobalConfig(remoteArg?: string, exists?: boolean, defaultEnvArg?: string, skipPrompts?: boolean): Promise<void> {
   console.log(colors.secondary.bold('Global Configuration'));
   blank();
 
@@ -141,6 +145,9 @@ async function initGlobalConfig(remoteArg?: string, exists?: boolean): Promise<v
   // Get remote URL
   let remote = remoteArg;
   if (!remote) {
+    if (skipPrompts) {
+      throw new Error('Remote URL is required. Use -r <url> to specify it.');
+    }
     const answers = await inquirer.prompt([
       {
         type: 'input',
@@ -182,18 +189,27 @@ async function initGlobalConfig(remoteArg?: string, exists?: boolean): Promise<v
     blank();
     info('This repository needs environment branches.');
 
-    const { createBranches } = await inquirer.prompt([
-      {
-        type: 'checkbox',
-        name: 'createBranches',
-        message: 'Select environments to create:',
-        choices: [
-          { name: 'development', checked: true },
-          { name: 'staging', checked: true },
-          { name: 'qa', checked: false },
-        ].filter(choice => !existingBranches.includes(choice.name)),
-      },
-    ]);
+    let createBranches: string[];
+
+    if (skipPrompts) {
+      // With -y, create development and staging by default
+      createBranches = ['development', 'staging'].filter(b => !existingBranches.includes(b));
+      info(`Creating default branches: ${createBranches.join(', ')}`);
+    } else {
+      const answers = await inquirer.prompt([
+        {
+          type: 'checkbox',
+          name: 'createBranches',
+          message: 'Select environments to create:',
+          choices: [
+            { name: 'development', checked: true },
+            { name: 'staging', checked: true },
+            { name: 'qa', checked: false },
+          ].filter(choice => !existingBranches.includes(choice.name)),
+        },
+      ]);
+      createBranches = answers.createBranches;
+    }
 
     if (createBranches.length > 0) {
       const branchSpinner = ora('Creating environment branches...').start();
@@ -212,26 +228,36 @@ async function initGlobalConfig(remoteArg?: string, exists?: boolean): Promise<v
     blank();
   }
 
-  // Ask for additional options
-  const envChoices = existingBranches.length > 0
-    ? existingBranches.map(b => b === 'main' ? 'production' : b)
-    : ['development', 'staging', 'production'];
+  // Determine default environment
+  let defaultEnv: string;
+  let encrypt = false;
 
-  const { defaultEnv, encrypt } = await inquirer.prompt([
-    {
-      type: 'list',
-      name: 'defaultEnv',
-      message: 'Default environment:',
-      choices: envChoices,
-      default: envChoices.includes('development') ? 'development' : envChoices[0],
-    },
-    {
-      type: 'confirm',
-      name: 'encrypt',
-      message: 'Enable encryption for .env files?',
-      default: false,
-    },
-  ]);
+  if (skipPrompts) {
+    // Use provided env or default to development
+    defaultEnv = defaultEnvArg || 'development';
+  } else {
+    const envChoices = existingBranches.length > 0
+      ? existingBranches.map(b => b === 'main' ? 'production' : b)
+      : ['development', 'staging', 'production'];
+
+    const answers = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'defaultEnv',
+        message: 'Default environment:',
+        choices: envChoices,
+        default: envChoices.includes('development') ? 'development' : envChoices[0],
+      },
+      {
+        type: 'confirm',
+        name: 'encrypt',
+        message: 'Enable encryption for .env files?',
+        default: false,
+      },
+    ]);
+    defaultEnv = answers.defaultEnv;
+    encrypt = answers.encrypt;
+  }
 
   // Save config
   const config = createDefaultGlobalConfig(remote!);
@@ -243,7 +269,7 @@ async function initGlobalConfig(remoteArg?: string, exists?: boolean): Promise<v
   blank();
 }
 
-async function initLocalConfig(projectArg?: string, exists?: boolean): Promise<void> {
+async function initLocalConfig(projectArg?: string, exists?: boolean, skipPrompts?: boolean): Promise<void> {
   console.log(colors.secondary.bold('Project Configuration'));
   blank();
 
@@ -262,24 +288,30 @@ async function initLocalConfig(projectArg?: string, exists?: boolean): Promise<v
   // Get project name
   let project = projectArg;
   if (!project) {
-    const answers = await inquirer.prompt([
-      {
-        type: 'input',
-        name: 'project',
-        message: 'Project name:',
-        default: suggestedName,
-        validate: (input: string) => {
-          if (!input.trim()) {
-            return 'Project name is required';
-          }
-          if (!/^[a-zA-Z0-9_-]+$/.test(input)) {
-            return 'Project name can only contain letters, numbers, hyphens and underscores';
-          }
-          return true;
+    if (skipPrompts) {
+      // Use directory name as default
+      project = suggestedName;
+      info(`Using project name: ${project}`);
+    } else {
+      const answers = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'project',
+          message: 'Project name:',
+          default: suggestedName,
+          validate: (input: string) => {
+            if (!input.trim()) {
+              return 'Project name is required';
+            }
+            if (!/^[a-zA-Z0-9_-]+$/.test(input)) {
+              return 'Project name can only contain letters, numbers, hyphens and underscores';
+            }
+            return true;
+          },
         },
-      },
-    ]);
-    project = answers.project;
+      ]);
+      project = answers.project;
+    }
   }
 
   // Save config
