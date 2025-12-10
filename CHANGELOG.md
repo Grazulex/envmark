@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0](https://github.com/Grazulex/envmark/releases/tag/v1.2.0) (2025-12-10)
+
+### Features
+
+- **crypto:** add AES-256-GCM encryption support ([8bb1a45](https://github.com/Grazulex/envmark/commit/8bb1a45e1803fa0b59b5b9e7aacb56ce4ad90d87))
+
+### Documentation
+
+- add logo to README header ([6b19be3](https://github.com/Grazulex/envmark/commit/6b19be3af22455d941fd8f5eca8ced29cc281e83))
+- add README and logo generation prompt ([2677ba9](https://github.com/Grazulex/envmark/commit/2677ba9e1ea04be800b67784d2d42fba8ecd8c52))
+
+### Chores
+
+- rename package to @grazulex/envmark for npm publish ([761661e](https://github.com/Grazulex/envmark/commit/761661e954a4e63c3c488d79dbc22648357c3e22))
 ## [1.1.0](https://github.com/Grazulex/envmark/releases/tag/v1.1.0) (2025-12-10)
 
 ### Features
