@@ -45,27 +45,36 @@ envmark-secrets (repo Git unique)
 
 ## Structure des fichiers
 
-### Cote projet utilisateur
+### Configuration globale (~/.envmark/)
 ```
-mon-projet/
-├── .env              # Fichier environnement actif (gitignore)
-├── .envmark.json     # Configuration (versionne)
-└── .envmark.key      # Cle AES-256 optionnelle (gitignore)
+~/.envmark/
+├── config.json       # Config globale (remote, defaultEnv, encrypt)
+├── .envmark.key      # Cle AES-256 optionnelle (mode 600)
+└── repos/            # Cache des repos clones
+    └── <hash>/       # Clone du repo distant
 ```
 
-### .envmark.json
+### ~/.envmark/config.json
 ```json
 {
   "remote": "git@github.com:team/envmark-secrets.git",
-  "project": "my-project-name",
   "defaultEnv": "development",
   "encrypt": false
 }
 ```
 
-### .envmark.key (optionnel, si encrypt: true)
+### Configuration locale (par projet)
 ```
-ek_base64encodedAES256key...
+mon-projet/
+├── .env              # Fichier environnement actif (gitignore)
+└── .envmark.json     # Config projet (versionne)
+```
+
+### .envmark.json (dans chaque projet)
+```json
+{
+  "project": "my-project-name"
+}
 ```
 
 ## Commandes CLI
