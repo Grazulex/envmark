@@ -14,7 +14,7 @@ program.configureOutput({
 program
   .name('envmark')
   .description(colors.muted('Manage .env files using Git as storage backend'))
-  .version('0.1.0')
+  .version('1.0.0')
   .addHelpText('beforeAll', () => {
     console.log('');
     console.log(colors.primary.bold('  EnvMark') + colors.muted(' - Manage .env files with Git'));
