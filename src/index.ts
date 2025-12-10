@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import chalk from 'chalk';
-import { colors, icons, divider } from './lib/ui.js';
+import { colors } from './lib/ui.js';
+
+// Import commands
+import { initCommand } from './commands/init.js';
 
 const program = new Command();
 
@@ -30,8 +32,10 @@ program
     return '';
   });
 
-// Commands will be added here as subcommands
-// - init
+// Register commands
+program.addCommand(initCommand);
+
+// TODO: Add remaining commands
 // - remote
 // - push
 // - pull
