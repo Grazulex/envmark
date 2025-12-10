@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1](https://github.com/Grazulex/envmark/releases/tag/v1.2.1) (2025-12-10)
+
+### Tests
+
+- add unit tests for crypto, config, and git modules ([380088d](https://github.com/Grazulex/envmark/commit/380088da2f89b7cd4261e0d5240d70b64ad01afd))
 ## [1.2.0](https://github.com/Grazulex/envmark/releases/tag/v1.2.0) (2025-12-10)
 
 ### Features
