@@ -1,16 +1,21 @@
 import { Command } from 'commander';
 import ora from 'ora';
 import { loadGlobalConfig, globalConfigExists } from '../lib/config.js';
-import { GitManager, branchToEnvName } from '../lib/git.js';
+import { GitManager, branchToEnvName, resolveEnvAlias } from '../lib/git.js';
 import { colors, icons, header, error, info, blank, envBadge } from '../lib/ui.js';
 
 export const listCommand = new Command('list')
   .alias('ls')
-  .description('List all environments')
+  .argument('[env]', 'Environment to list projects from')
+  .description('List all environments, or projects in a specific environment')
   .option('-v, --verbose', 'Show more details')
-  .action(async (options) => {
+  .action(async (env, options) => {
     try {
-      await runList(options);
+      if (env) {
+        await runListProjects(env, options);
+      } else {
+        await runList(options);
+      }
     } catch (err) {
       error((err as Error).message);
       process.exit(1);
@@ -88,6 +93,70 @@ async function runList(options: ListOptions): Promise<void> {
 
   } catch (err) {
     spinner.fail('Failed to list environments');
+    throw err;
+  }
+}
+
+async function runListProjects(env: string, options: ListOptions): Promise<void> {
+  if (!globalConfigExists()) {
+    throw new Error('EnvMark not configured. Run "envmark init" first.');
+  }
+
+  const config = loadGlobalConfig();
+  const branch = resolveEnvAlias(env);
+
+  header(`Projects in ${env}`);
+  blank();
+
+  const spinner = ora(`Fetching projects from ${branch}...`).start();
+
+  try {
+    const git = new GitManager({ remote: config.remote, verbose: false });
+    await git.ensureRepo();
+
+    // Check if branch exists
+    if (!(await git.branchExists(env))) {
+      spinner.fail(`Environment '${env}' does not exist`);
+      blank();
+      console.log(colors.muted(`Available environments: ${colors.primary('envmark list')}`));
+      blank();
+      return;
+    }
+
+    const projects = await git.listProjects(env);
+    spinner.stop();
+
+    if (projects.length === 0) {
+      info(`No projects found in ${branch}`);
+      blank();
+      console.log(colors.muted(`Push your first project with: ${colors.primary(`envmark push ${env}`)}`));
+      blank();
+      return;
+    }
+
+    console.log(colors.muted(`  Remote: ${config.remote}`));
+    console.log(colors.muted(`  Branch: ${branch}`));
+    blank();
+
+    for (const project of projects) {
+      let line = `  ${icons.bullet} `;
+      line += colors.primary(project.name);
+
+      if (project.hasEnv) {
+        line += colors.success(' ✓ .env');
+      } else {
+        line += colors.muted(' (empty)');
+      }
+
+      console.log(line);
+    }
+
+    blank();
+    console.log(colors.muted(`  ${projects.length} project(s)`));
+    blank();
+
+  } catch (err) {
+    spinner.fail('Failed to list projects');
     throw err;
   }
 }

@@ -1,5 +1,5 @@
 import { simpleGit, SimpleGit, SimpleGitOptions } from 'simple-git';
-import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync, readdirSync, statSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 import { colors, icons } from './ui.js';
@@ -356,5 +356,38 @@ export class GitManager {
    */
   getLocalRepoPath(): string {
     return this.repoPath;
+  }
+
+  /**
+   * List all projects in a given environment (branch)
+   * Each directory in the repo root = one project
+   */
+  async listProjects(env: string): Promise<Array<{ name: string; hasEnv: boolean }>> {
+    const branch = resolveEnvAlias(env);
+
+    // Checkout the branch first
+    await this.checkout(branch);
+
+    const projects: Array<{ name: string; hasEnv: boolean }> = [];
+
+    // Read all directories in the repo root
+    const entries = readdirSync(this.repoPath);
+
+    for (const entry of entries) {
+      // Skip hidden files/directories and non-directories
+      if (entry.startsWith('.')) continue;
+
+      const entryPath = join(this.repoPath, entry);
+      if (!statSync(entryPath).isDirectory()) continue;
+
+      // Check if this project has a .env file
+      const envFilePath = join(entryPath, '.env');
+      const encFilePath = join(entryPath, '.env.enc');
+      const hasEnv = existsSync(envFilePath) || existsSync(encFilePath);
+
+      projects.push({ name: entry, hasEnv });
+    }
+
+    return projects.sort((a, b) => a.name.localeCompare(b.name));
   }
 }
