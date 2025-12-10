@@ -1,0 +1,12 @@
+src/
+*.ts
+tsconfig.json
+.eslintrc*
+.gitignore
+.envmark.json
+LOGO_PROMPT.md
+logo.png
+assets/logo-transparent.png
+assets/logo-512.png
+node_modules/
+.git/

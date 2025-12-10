@@ -1,5 +1,5 @@
 {
-  "name": "envmark",
+  "name": "@grazulex/envmark",
   "version": "1.1.0",
   "description": "CLI for managing .env files using Git as storage backend",
   "type": "module",
@@ -23,7 +23,15 @@
     "secrets",
     "configuration"
   ],
-  "author": "",
+  "author": "Grazulex <grazulex@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Grazulex/envmark.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Grazulex/envmark/issues"
+  },
+  "homepage": "https://envmark.tech",
   "license": "MIT",
   "dependencies": {
     "commander": "^12.1.0",
