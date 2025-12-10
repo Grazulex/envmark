@@ -1,9 +1,17 @@
-# EnvMark
+<p align="center">
+  <img src="assets/logo-256.png" alt="EnvMark Logo" width="128" height="128">
+</p>
 
-**Manage .env files with Git** - A simple, secure way to share environment variables across your team.
+<h1 align="center">EnvMark</h1>
 
-[![Version](https://img.shields.io/badge/version-1.1.0-10B981.svg)](https://github.com/Grazulex/envmark)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+<p align="center">
+  <strong>Manage .env files with Git</strong> - A simple, secure way to share environment variables across your team.
+</p>
+
+<p align="center">
+  <a href="https://github.com/Grazulex/envmark"><img src="https://img.shields.io/badge/version-1.1.0-10B981.svg" alt="Version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License"></a>
+</p>
 
 ## Why EnvMark?
 
