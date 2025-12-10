@@ -11,7 +11,7 @@ subtasks: []
 dependencies: []
 blocked_by: []
 created_date: '2025-12-10T00:55:53.350Z'
-updated_date: '2025-12-10T01:02:16.417Z'
+updated_date: '2025-12-10T01:03:51.435Z'
 changelog:
   - timestamp: '2025-12-10T00:55:53.350Z'
     action: created
@@ -30,6 +30,10 @@ changelog:
     details: Task updated
     user: AI
   - timestamp: '2025-12-10T01:02:16.417Z'
+    action: modified
+    details: Task updated
+    user: AI
+  - timestamp: '2025-12-10T01:03:51.435Z'
     action: modified
     details: Task updated
     user: AI
@@ -76,5 +80,8 @@ ai_notes: >
 
   **2025-12-10T01:02:16.417Z** - **02:01** - Build OK, dist/ genere. CLI
   fonctionne: --help et --version OK.
+
+  **2025-12-10T01:03:51.435Z** - **02:05** - CLI colore ajoute (ui.ts), help
+  avec couleurs. Pret pour release.
 ---
 Initialiser npm, installer les dependances (commander, simple-git, chalk, inquirer, ora), verifier que le build fonctionne
