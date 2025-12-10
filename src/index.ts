@@ -5,6 +5,8 @@ import { colors } from './lib/ui.js';
 
 // Import commands
 import { initCommand } from './commands/init.js';
+import { pushCommand } from './commands/push.js';
+import { pullCommand } from './commands/pull.js';
 
 const program = new Command();
 
@@ -34,11 +36,11 @@ program
 
 // Register commands
 program.addCommand(initCommand);
+program.addCommand(pushCommand);
+program.addCommand(pullCommand);
 
 // TODO: Add remaining commands
 // - remote
-// - push
-// - pull
 // - list
 // - create
 // - delete
