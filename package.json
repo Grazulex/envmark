@@ -1,6 +1,6 @@
 {
   "name": "envmark",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI for managing .env files using Git as storage backend",
   "type": "module",
   "main": "dist/index.js",

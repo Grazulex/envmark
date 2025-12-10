@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.1.0](https://github.com/Grazulex/envmark/releases/tag/v1.1.0) (2025-12-10)
+
+### Features
+
+- **cli:** implement all remaining CLI commands ([13b6a67](https://github.com/Grazulex/envmark/commit/13b6a675019a7ba18beda18e20969b6b7274296f))
+- **cli:** enhance init with branch creation + add create command ([a295e7c](https://github.com/Grazulex/envmark/commit/a295e7cac31a9fa09b1d5b8ac4a44f8f506cc584))
+- **cli:** add push and pull commands ([d047f1d](https://github.com/Grazulex/envmark/commit/d047f1d449a16f7fa1d83a08d77050e699edaf7d))
+- **cli:** add init command for configuration setup ([05ab503](https://github.com/Grazulex/envmark/commit/05ab5039efb6c972f6c0aeeb20522fcea23fa144))
+- **lib:** add Config module with global/local separation ([2c92483](https://github.com/Grazulex/envmark/commit/2c924831b2beac52d6af5470215cbc06461e759e))
+- **lib:** add Git manager module for repository operations ([bc464ee](https://github.com/Grazulex/envmark/commit/bc464ee44a025a3fbcaa2b072f1df07b35b112a4))
 ## [1.0.0] - 2025-12-10
 
 ### Breaking Changes
