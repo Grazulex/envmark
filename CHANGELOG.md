@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1](https://github.com/Grazulex/envmark/releases/tag/v1.3.1) (2026-10-23)
+
+### Security
+
+- Update dependencies and bump `simple-git` to ^4.0.2 (argument injection in `@simple-git/argv-parser`) and `vitest` to ^5.0.5 (vite, esbuild, tinypool advisories): `npm audit` now reports no vulnerabilities (was 3 critical, 9 high, 5 moderate)
+
+### Fixed
+
+- `envmark --version` reported 1.0.0 instead of the package version
+- Vitest only runs the TypeScript tests in `src/` (Vitest 5 also picked up the compiled copies in `dist/`)
+
 ## [1.2.1](https://github.com/Grazulex/envmark/releases/tag/v1.2.1) (2025-12-10)
 
 ### Tests
